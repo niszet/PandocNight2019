@@ -1,0 +1,536 @@
+---
+title: R MarkdownでWord文書を作って<BR>同人誌作った話とその先
+author: "niszet"
+date: "2019/5/20"
+output:
+  revealjs::revealjs_presentation:
+    reveal_option:
+      slideNumber: true
+      center: true
+      width: 1440
+      height: 900
+      mouseWheel: true
+#    incremental: true
+    theme: blood
+    highlight: kate
+    css: "for-revealjs_blood.css"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# R MarkdownでWord文書を作って同人誌作った話
+
+## 誰？
+
+なまえ：niszet\
+ぞくせい：Rおじさん 兼 回路設計miscおじさん\
+すてーと：4月末退職して次のステージへ\
+
+![self](Figs/self.jpg)
+
+## タイトル is どういうこと？
+
+* R界隈で活動したい。
+
+* でも、分析とかやってないのでなんもわからん
+
+* R Markdownはわかる…けど
+
+* Word形式へ出力する情報が全然見つからない
+
+* ないので書いた
+
+
+## Word本について
+
+![hyoshi](Figs/hyoshi.PNG)
+
+* 技術書典5で初頒布。累計140？部くらい出ている。
+
+  * でもまだ在庫あるよ
+
+* R Markdownで書いてWordに変換してpdfにして入稿。
+
+  * R Markdownでも同人誌が作れる！
+
+* 気づいたら1か月くらいで80ページになっていた不思議
+
+
+# R/R Markdownとは？
+## "R" Markdown？
+
+* R言語で文書作成する際のデファクトスタンダード。
+
+  * R言語は主に統計方面に強く、R Markdownを使ってデータの処理自体も一体化することで結果の再現性に有効。
+
+* 後段でPandocを使用することを前提として、\
+  R言語で書かれた処理の結果（図や表など）を含んだMarkdownが作成できる。
+
+* 文書形式の変換はPandocが担当するため、基本的にはPandoc's Markdownで書く必要がある。
+
+* コードはブロック形式、インライン形式それぞれで記述可能。用途に合わせて使用する。
+
+
+## R Markdownに関する書籍など
+
+和書が比較的充実している。ネット上に情報も多い。
+
+* R Markdown入門 - kazutan on web\
+  https://kazutan.github.io/kazutanR/Rmd_intro.html
+
+
+* R Markdown: The Definitive Guide\
+  https://bookdown.org/yihui/rmarkdown/
+
+
+* ドキュメント・プレゼンテーション生成（ちょっと古い記述もあるかも）\
+  https://www.kyoritsu-pub.co.jp/bookdetail/9784320123724
+
+
+
+他にも検索すれば沢山情報が手に入る（はず）
+
+
+## R言語はいいぞ…
+
+* R 言語は統計関係のライブラリが多く、可視化や前処理、ドキュメント化にも強い。
+
+* R MarkdownはRだけでなく、PythonやJuliaなどの言語の実行結果を使うことも可能。
+
+  * R Markdown: The Definitive Guide 2.7 Other language engines\
+    https://bookdown.org/yihui/rmarkdown/language-engines.html
+
+  * 実行結果を含むドキュメント自動生成に広くR Markdownが使用可能なのでは？
+
+
+
+# R Markdown 環境作成編
+## 環境を揃える苦しみ
+
+* 以下ではWindows上で使用することを想定しています。
+
+  * そもそもMacでOfficeはツライ（らしい）
+
+  * R自体はMac/Linuxでも使用可能だし、docxファイルの作成自体はLinux上でも可能。
+
+* R, RStudio, RTools, Windows, Pandoc, Wordのそれぞれのバージョンが揃っていないと完全再現できない（と思う）
+
+  * 実際に新しいPandocのバージョンで作成したPowerPointのテンプレートが古いPandoc側で使用できないなどの問題はあった。
+
+  * WindowsやWordはOffice365だと勝手に更新されるのでバージョンを保つのは困難（今のところこれが問題となったことはないけど）
+
+* Setup自体はかなり簡単なので、導入はしやすい。
+
+* Q. Docker使えばいいんじゃないですかね…？
+
+  * A. そうですね。でも…ちょっとした気持ちで文章・文書を書きたいだけなのに、それって本末転倒では…？
+
+
+## R/RStudio IDEの導入
+
+* Rをダウンロード
+  
+  * Download R-3.6.0 for Windows.\
+  https://cran.r-project.org/bin/windows/base/
+
+* R Studio IDEをダウンロード
+  
+  * Download RStudio - RStudio\
+  https://www.rstudio.com/products/rstudio/download/
+
+
+* RToolsをダウンロード
+
+  * Building R for Windows (現時点ではRTools35.exeをダウンロードがベスト）\
+  https://cran.r-project.org/bin/windows/Rtools/
+
+* （必要なら）Pandocを置き換える
+  
+
+## RStudio中のPandoc環境について
+
+Pandocは同梱されているが、少し古い場合がある（Pandocの更新が速すぎるという説）
+
+```r
+# Pandocのファイルパスを確認（RStudioの下にあるはず）
+rmarkdown::pandoc_exec()
+
+# Pandocのバージョンを確認
+rmarkdown::pandoc_version()
+```
+
+Pandocのバージョンを変えたい場合は、上のコマンドで確認したファイルパスにある実行ファイルを所望のバージョンのPandocで上書きする。上書き後、RStudioは念のため再起動する。
+
+
+## R Markdownで文書作成の流れ
+
+* R MarkdownからMarkdownへの変換をRのパッケージで対応している。
+
+  * `knitr` や `rmarkdown` パッケージでhtml, word, pdfなどに対応
+
+* 出力形式毎にパッケージが存在する
+
+  * GitBook形式などの `bookdown`
+
+  * CSS組版の `pagedown`
+
+  * HTMLスライドの `revealjs`
+
+  * などなど…
+
+* どの形式でもMarkdownファイルに変換後はPandocで変換処理をするので、Pandocの知識はある程度のレベル以上から必須となる（はず）
+
+
+## 結局のところ、R Markdownとは…？
+
+* R Markdownはプログラムを埋め込むことが出来るMarkdownだと思えばよく、Markdownの生成を自動化したり条件によって処理を変えるなどといったことが可能。
+
+* 肝心のフォーマット変換はPandocが行うので、Pandocに出来ないことはR Markdownでも基本的には"出来ない"。
+
+* 生成後のファイルをRを使って直接修正する方法もあるけど…
+
+  * `officer` パッケージなど
+
+
+# Pandocのはなし
+## Pandocをよりよく知るために手を付ける順番
+
+1. とりあえずMarkdownを書いてファイルを変換、動かしてみる
+
+1. 設定を変更して出力ファイルを見て判断
+
+1. Pandoc native形式とLua filterに手を出す（他の言語のFilterでも良い）
+
+1. Reader/Writerに手を出す(Haskell...)
+
+
+## Markdownの文法
+
+* Pandocのマニュアルを読むか、R Markdownのマニュアルが便利（最低限がまとまっているので）
+
+* 書籍はコレでしょ！(Markdownの本全然ない…）
+
+  * Markdownライティング入門　プレーンテキストで気楽に書こう！\
+  https://nextpublishing.jp/book/10278.html
+
+
+## Users Guideは読もう。
+
+* Pandoc User’s Guide\
+https://pandoc.org/MANUAL.html
+
+
+* （新・工事中）Pandocユーザーズガイド 日本語版\
+https://pandoc-doc-ja.readthedocs.io/ja/latest/users-guide.html
+
+
+何度読んでも何度も忘れるので何度も読み直す必要がある…。
+
+ただし、書いてあることとちょっと挙動が異なるような…？みたいなことはある（が、各種環境の違いで再現しないことが多々あるのでなんとも…）
+
+ちょっとわかりにくいよね…って部分があるので自分で書いてみないとわからない部分多々あり。
+
+
+
+## Pandocのオプションはデフォルトで有効なのか無効なのか問題
+
+* Markdown extensionsのうち、デフォルトで有効なものとそうではないものがある。これはマニュアルには明記されていない
+
+  * あったら教えてください…
+
+  * たぶんこれもコード読む必要がある…
+
+* Word本でも主要なものは明記したが、使用頻度が低そうなものは除いた。HTML出力の場合などもまた別にあるので…
+
+
+## Pandocについてまとめ
+
+* とりあえず使ってみよう。
+
+* 自分が良く使う設定や文法は一通りテンプレートにしてコピペしておくのが一番…
+
+* 設定は好みがあるので、どれがベストかは…？？
+
+* わかってる人に聞くのが一番
+
+  * どうすればよい？
+
+
+# Word形式の話
+## Word文書を作成する
+
+* 世の中にはドキュメントはWord形式で欲しいと言ってくる層が一定数いる。
+
+  * 分析界隈でもそうらしい…。
+
+    * JTC…？当然ですね…。
+    
+      * でもそもそも自由にRとかインストールできないよね…ツライ
+
+* 書いたときは絶対需要ないと思ったのにそれなりにウケてるのが不思議…。
+
+
+## Wordはスタイルを使いましょう…
+
+* Wordで直接書く場合も段落や文字に対して見栄えを定義したスタイルを使って書いた方が良い
+
+  * …のだが、人間のやることなのでミスが多い。スタイルを設定しない人は沢山いる。
+
+* PandocでWordに変換する場合、文章の構成要素それぞれにWordのスタイルが割り振られる。
+
+* Wordはスタイル毎に見た目の設定が出来るので、対応関係がわかっていればMarkdownを書くだけでいい感じの見た目のWordドキュメントが作れる。
+
+  * …んだけど、このスタイルの設定がとても鬼門。難しい。まとめたい・・・
+
+
+## Template
+
+* Pandocで生成する文書の見栄えを決めるのはテンプレート。
+
+* Wordの場合は`--reference-doc`で指定する。
+
+* Word自体は結構高機能なので、大体のことが出来る。ヘッダーフッターも設定しておけば有効。
+
+  * ロゴいれたり、ページ番号いれたり、パラメータをいれたり
+
+* スタイルの設定が大変だが、一度テンプレートファイルを作成してしまえば使いまわしがきくので時間をかける価値はある。
+
+
+
+## スタイルの対応表が欲しい…。
+
+* ない。
+
+  * ないので作った。
+
+* 実は昔書いている。未だにアクセス数がとても多い謎。
+
+  * (1/15 追記) Markdown Preview Enhanced+pandocでdocxを出力する際のあれこれ（あるいはスタイル対応表）
+    https://niszet.hatenablog.com/entry/2018/01/14/214800
+
+
+
+## スタイル目視確認のツラミ
+
+* どのようにスタイルが割り当てられているかは、PandocのWriterのコードを読めば多分わかるはず。  
+
+  * `Text/Pandoc/Writers/OpenDocument.hs` あたりにありそう\
+     https://github.com/jgm/pandoc/blob/master/src/Text/Pandoc/Writers/OpenDocument.hs
+
+
+* しかし、当時は（今も）Haskellの解読がniszetにはちょっと厳しかったので、結局、書いて変換して確認する…を繰り返し実行した（ツライが確実）
+
+
+
+# OOXML(Office Open XML)の話
+
+## docxはzipされたxml
+
+* 拡張子がdocxのWord文書のファイルはzipされたxmlファイル。
+
+* PandocにはGeneric raw attributeがあるので、これを使って出力先の形式のコードを直接埋め込むことが出来る。
+  
+  * "Generic raw attribute" \
+    https://pandoc.org/MANUAL.html#generic-raw-attribute
+
+* Wordの場合はOffice Open XMLで書かれたコードをそのまま埋め込むことが可能。
+
+
+## OOXML使う例
+
+* Markdownにはページの概念がない（HTMLにもないけどネ）
+
+* Wordで出力する場合は「丁度良い場所で改ページしたい」ことがある
+
+* 公式のマニュアルにも改ページの例が載っている
+
+  * "Generic raw attribute" \
+   https://pandoc.org/MANUAL.html#generic-raw-attribute
+
+
+* 任意のOOXMLを埋め込むことが出来るが、 一番外側は`<w:p>`タグで囲う形にすること。
+
+* document.xmlに含まれる内容のみ対応できる。他のファイルに影響を与えるようなものはダメ。
+
+
+
+
+## 文書中に直接OOXMLを直接書くのはちょっとツライ
+
+* 文章中にコードを埋め込むと、文章としての可読性はかなり落ちる（ブロックなら折りたたむなども出来るが）
+
+* Rの関数化、パッケージ化することで、見づらいOOXMLのブロックが文書中に散りばめられることがなくなる。
+
+  * インラインにRのコードが書けるのでOOXMLのコードブロックを文字列として返す関数を定義すればよい。"R" Markdownを使う強みの１つ。
+
+    * ブロックのRのコードだとうまくいかないと思う。
+
+  * 出来るだけ文章書くことに専念できるようにパッケージ化して「おまじない」にしたい
+
+    * 作ろうとしていたが燃え尽きている…。 https://github.com/niszet/rmd2docxsup
+
+
+
+# 今後のおはなし。
+## 次のステップ
+
+* R側で出来ることは多いが、Pandocの仕様的に逃げられない部分はPandoc側で何とかしたい。
+
+  * Writer起因の動作は特にそう。しかし、Reader/Writerに手を出したくない。
+
+* Lua filterを使えば良さそう。
+
+
+## Pandoc Nativeの話
+
+* Lua filterはnative形式のデータ構造に対して変換処理をかけるので、nativeデータ構造の理解は大事。
+
+* PandocはReaderでファイルを読み、一旦Pandoc Native形式に変換してそれをWriterで所望の形式に変換している。
+
+* `-t native`を指定すればNative形式で出力することも可能。
+
+* 意図した変換結果が得られなかった場合、一旦nativeで出力するのはアリ。
+
+* ASTなのでそんなに難しくはない（諸説あります）
+
+
+## Lua filterの話
+
+* PandocはLuaで書かれたFilterが使える。
+
+  * PandocのReader/Writerの挙動は変更せず、解釈されたASTに対して処理を加えることが出来る。
+
+* Lua Filterは環境に依存しない（LuaがPandocに含まれている）ため移植性が高い。Luaもバージョン5.3なので最新（？）環境が使える。
+
+* PandocのASTを変換するので、Writerで処理しているものには対応できない。
+
+  * 他の言語でもJSONを取り扱えるなら問題なく使えるらしいが環境を揃えるのが大変になるので、Lua Filterを使う方が移植性としてはベター
+
+
+https://pandoc.org/lua-filters.html
+
+https://github.com/pandoc/lua-filters
+
+
+http://hackage.haskell.org/package/pandoc-types-1.19/docs/Text-Pandoc-Definition.html
+
+
+
+## Luaのお勉強
+
+* Programming in Lua の Fourth edition がLua5.3の情報も載っていて（むしろ5.3の話がメイン）良い。翻訳版はまだなさそう。
+
+  * https://www.lua.org/pil/
+
+
+* Lua5.xでも基本的な文法はほぼ問題ないので、Webにある日本語で書かれたサイトから入門する方が良さそう。
+
+  * たとえば：\
+    Lua 5.1 言語仕様メモ\
+    https://qiita.com/zenwerk/items/699a8b73245fcf61c426
+
+
+* リファレンスマニュアルは日本語訳されている。
+
+  * Lua 5.3 リファレンスマニュアル\
+    http://milkpot.sakura.ne.jp/lua/lua53_manual_ja.html
+
+
+* tableまでの話と関数の書き方がわかれば「とりあえず動かすレベル」は出来る
+
+
+## 具体例：スタイルの割り当てを変える。
+
+* 脚注や見出しに`Code`が入る場合、`Source Code`のスタイルがCodeに当てられてしまうため、周囲の文字列とフォントやフォントサイズが違い、見た目がおかしくなる。
+
+![same_style](Figs/style_is_same.PNG)
+
+
+## コード例
+
+下記のように簡単（？）に実現できる。
+
+```lua
+-- 見出し2に含まれるCodeをH2v2というスタイルに割り当て直している
+function Header (elem)
+  t = {}
+  if elem.level == 2 then
+    for k, v in pairs( elem.content ) do
+      if v.tag == "Code" then
+        v = pandoc.Span(v.text, 
+            pandoc.Attr("", {}, {{"custom-style", "H2v2"}}))
+      end
+      t[k] = v
+    end
+    return(pandoc.Header(elem.level, t))
+  end
+end
+```
+
+## ちょっとだけ説明。
+
+* `function Header (elem) ... end` でHeader要素に対して処理が出来る。
+
+  * Metaなどにも対応できる。
+
+* 戻り値は`pandoc.要素`で返すと良いが文字列でも良さそう。
+
+* Luaは比較的型に寛容だがPandoc(Haskell)は厳しいのでnumericを返すとエラーになるので注意。
+
+* 自身の子要素でCodeがあったらSpanを使ってカスタムスタイルをあてている。
+
+
+
+## Lua filterを使うためには…
+
+Pandocがどういう要素とプロパティを持っているかはPandocのLua filterの解説を読みましょう。
+
+https://pandoc.org/lua-filters.html
+
+
+このページが一番詳しいんだけど、どう書けば良いのかは難しい（教えて）
+
+Pandocの内部のデータ構造がわかるとLua filterの書き方がわかってきますよ
+
+
+## スタイルの話再び
+
+Wordのスタイルは段落と文字の2種類がある（PandocのBlockとInlineに相当する）
+
+そのため、スタイルの割り当てで対応するスタイルがないとうまくスタイルをあてられない。
+
+
+
+## PowerPointをつくる
+
+* Wordと比べてスタイルが設定できないなど制限が多い。
+
+* revealjsのスライドの場合はcssを頑張れば良いのだが、PowerPointの場合は…Lua filter+OOXMLで対応するしかなさそう（ツライ）
+
+* でもつくってLTした\
+https://speakerdeck.com/niszet/r-markdownwoshi-tutazai-xian-de-repoteingu
+
+
+本も書いた…が、現状では制約が多くて厳しい…。
+
+
+
+
+
+# おわりに
+## まとめ
+
+* R MarkdownでWordを作るのは可能
+
+* もうちょっと頑張りどころがある
+
+* ここでは紹介しきれなかった細かいツラミがある…
+
+
+
+## Enjoy!!
+![self](Figs/self.jpg)
+
