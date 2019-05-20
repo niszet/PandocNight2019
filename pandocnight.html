@@ -2133,7 +2133,7 @@ R言語で書かれた処理の結果（図や表など）を含んだMarkdown�
 <li><p>文章中にコードを埋め込むと、文章としての可読性はかなり落ちる（ブロックなら折りたたむなども出来るが）</p></li>
 <li><p>Rの関数化、パッケージ化することで、見づらいOOXMLのブロックが文書中に散りばめられることがなくなる。</p>
 <ul>
-<li><p>インラインに<code>r</code>の形で書ける。OOXMLのコードブロックを文字列として返す関数を定義すればよい。“R” Markdownを使う強みの１つ。</p>
+<li><p>インラインにRのコードが書けるのでOOXMLのコードブロックを文字列として返す関数を定義すればよい。“R” Markdownを使う強みの１つ。</p>
 <ul>
 <li>ブロックのRのコードだとうまくいかないと思う。</li>
 </ul></li>
@@ -2244,21 +2244,20 @@ Lua 5.1 言語仕様メモ<br />
 <p>そのため、スタイルの割り当てで対応するスタイルがないとうまくスタイルをあてられない。</p>
 </section><section id="powerpoint" class="slide level2">
 <h2>PowerPointをつくる</h2>
-<p>Wordと比べてスタイルが設定できないなど制限が多い。</p>
-<p>revealjsのスライドの場合はcssを頑張れば良いのだが、PowerPointの場合は…Lua filter+OOXMLで対応するしかなさそう（ツライ）</p>
-<p>でもつくってLTした</p>
-<p><a href="https://speakerdeck.com/niszet/r-markdownwoshi-tutazai-xian-de-repoteingu" class="uri">https://speakerdeck.com/niszet/r-markdownwoshi-tutazai-xian-de-repoteingu</a></p>
-<p>本も書いた…が、現状では厳しい。</p>
-</section><section id="revealjs" class="slide level2">
-<h2>revealjsでプレゼンテーションを作成する。</h2>
-<p>これとか。</p>
-<p>現状ではこちらの方が良いが、SpeakerDeckとかにup出来ないのが難点</p>
+<ul>
+<li><p>Wordと比べてスタイルが設定できないなど制限が多い。</p></li>
+<li><p>revealjsのスライドの場合はcssを頑張れば良いのだが、PowerPointの場合は…Lua filter+OOXMLで対応するしかなさそう（ツライ）</p></li>
+<li><p>でもつくってLTした<br />
+<a href="https://speakerdeck.com/niszet/r-markdownwoshi-tutazai-xian-de-repoteingu" class="uri">https://speakerdeck.com/niszet/r-markdownwoshi-tutazai-xian-de-repoteingu</a></p></li>
+</ul>
+<p>本も書いた…が、現状では制約が多くて厳しい…。</p>
 </section></section>
 <section><section id="section-10" class="title-slide slide level1"><h1>おわりに</h1></section><section id="section-11" class="slide level2">
-<h2>おわりに</h2>
+<h2>まとめ</h2>
 <ul>
-<li><p>Pandocにはここでは紹介できなかった細かいツラミがある</p></li>
-<li><p>懇親会で。</p></li>
+<li><p>R MarkdownでWordを作るのは可能</p></li>
+<li><p>もうちょっと頑張りどころがある</p></li>
+<li><p>ここでは紹介しきれなかった細かいツラミがある…</p></li>
 </ul>
 </section><section id="enjoy" class="slide level2">
 <h2>Enjoy!!</h2>

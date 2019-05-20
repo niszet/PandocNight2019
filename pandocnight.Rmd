@@ -209,9 +209,12 @@ Pandocのバージョンを変えたい場合は、上のコマンドで確認�
 
 ## Markdownの文法
 
-* Pandocのマニュアルを読むか、R Markdownのマニュアルが便利（最低限がまとまっているので）
+* Pandocのマニュアル（User's Guide）を読むか、R Markdownのマニュアルが便利（最低限がまとまっているので）
 
-* 書籍はコレでしょ！(Markdownの本全然ない…）
+  * 段落内改行が行末に半角空白2つかバックスラッシュ`\`かみたいな細かい話はPandoc User's Guideを読まないとわからない。
+
+
+* Markdown全般について知るなら、書籍はコレでしょ！
 
   * Markdownライティング入門　プレーンテキストで気楽に書こう！\
   https://nextpublishing.jp/book/10278.html
@@ -296,7 +299,7 @@ https://pandoc-doc-ja.readthedocs.io/ja/latest/users-guide.html
 
   * ロゴいれたり、ページ番号いれたり、パラメータをいれたり
 
-* スタイルの設定が大変だが、一度テンプレートファイルを作成してしまえば使いまわしがきくので時間をかける価値はある。
+* スタイルの設定が大変だが、一度テンプレートファイルを作成すれば使いまわしがきくので時間をかける価値はある。
 
 
 
@@ -308,9 +311,11 @@ https://pandoc-doc-ja.readthedocs.io/ja/latest/users-guide.html
 
 * 実は昔書いている。未だにアクセス数がとても多い謎。
 
-  * (1/15 追記) Markdown Preview Enhanced+pandocでdocxを出力する際のあれこれ（あるいはスタイル対応表）
+  * (1/15 追記) Markdown Preview Enhanced+pandocでdocxを出力する際のあれこれ（あるいはスタイル対応表）\
     https://niszet.hatenablog.com/entry/2018/01/14/214800
 
+
+* Pandocを使う以上はMarkdownの各Block, Inline要素がどのスタイルに割り当てられるのか？は共通なので、MPEでも同じ。
 
 
 ## スタイル目視確認のツラミ
@@ -324,9 +329,30 @@ https://pandoc-doc-ja.readthedocs.io/ja/latest/users-guide.html
 * しかし、当時は（今も）Haskellの解読がniszetにはちょっと厳しかったので、結局、書いて変換して確認する…を繰り返し実行した（ツライが確実）
 
 
+## Custom Styleもつかおう
+
+* Wordの場合はStyleでかなりの部分が対応できる。\
+  https://pandoc.org/MANUAL.html#custom-styles
+
+* 特にCustom Styleを使えれば、任意のStyleを割り当てられるので便利
+
+  * 見出し1に改行を入れるといったことも可能（`#`を使うと改行入れられない）
+
+  * これをRの関数で表現すれば本文が見づらくなることもない（はず）
+
+
+
+## Wordのはなしのまとめ
+
+* スタイルを設定したテンプレートを使おう
+
+* Markdownから作ればWordから直接書くよりもスタイルを有効に利用できる。
+
+* スタイルの設定は面倒…
+
+
 
 # OOXML(Office Open XML)の話
-
 ## docxはzipされたxml
 
 * 拡張子がdocxのWord文書のファイルはzipされたxmlファイル。
@@ -373,6 +399,15 @@ https://pandoc-doc-ja.readthedocs.io/ja/latest/users-guide.html
     * 作ろうとしていたが燃え尽きている…。 https://github.com/niszet/rmd2docxsup
 
 
+## Wordは機能が多すぎる…
+
+* OOXMLを使うことで、Markdownで表現できないWordの機能を使うことが可能
+
+* しかしWordは機能が多すぎる&OOXMLの解読がとても大変なので、Styleの使いこなしができてからでよいと思います。
+
+
+
+
 
 # 今後のおはなし。
 ## 次のステップ
@@ -381,7 +416,7 @@ https://pandoc-doc-ja.readthedocs.io/ja/latest/users-guide.html
 
   * Writer起因の動作は特にそう。しかし、Reader/Writerに手を出したくない。
 
-* Lua filterを使えば良さそう。
+* Lua filterを使えば良さそう。Writerの処理を迂回することができる。
 
 
 ## Pandoc Nativeの話
@@ -394,7 +429,7 @@ https://pandoc-doc-ja.readthedocs.io/ja/latest/users-guide.html
 
 * 意図した変換結果が得られなかった場合、一旦nativeで出力するのはアリ。
 
-* ASTなのでそんなに難しくはない（諸説あります）
+* 中身はASTなのでそんなに難しくはない（諸説あります）
 
 
 ## Lua filterの話
@@ -409,14 +444,27 @@ https://pandoc-doc-ja.readthedocs.io/ja/latest/users-guide.html
 
   * 他の言語でもJSONを取り扱えるなら問題なく使えるらしいが環境を揃えるのが大変になるので、Lua Filterを使う方が移植性としてはベター
 
+* これも公式の説明やLua filterのリポジトリがあるのでそれを参考にするのがよさそう。
+  
+  * https://pandoc.org/lua-filters.html
 
-https://pandoc.org/lua-filters.html
-
-https://github.com/pandoc/lua-filters
+  * https://github.com/pandoc/lua-filters
 
 
-http://hackage.haskell.org/package/pandoc-types-1.19/docs/Text-Pandoc-Definition.html
 
+
+## Lua filterを使うためには…
+
+* Pandocがどういう要素とプロパティを持っているかはPandocのLua filterの解説を読みましょう。
+
+  * https://pandoc.org/lua-filters.html
+
+
+* このページが一番詳しいんだけど、どう書けば良いのかは難しい（教えて）
+
+* Pandocの内部のデータ構造がわかるとLua filterの書き方がわかってきますよ(?)
+
+  * http://hackage.haskell.org/package/pandoc-types-1.19/docs/Text-Pandoc-Definition.html
 
 
 ## Luaのお勉強
@@ -484,23 +532,11 @@ end
 
 
 
-## Lua filterを使うためには…
+## スタイルの話、補足。
 
-Pandocがどういう要素とプロパティを持っているかはPandocのLua filterの解説を読みましょう。
+* Wordのスタイルは段落と文字の2種類がある（PandocのBlockとInlineに相当する）
 
-https://pandoc.org/lua-filters.html
-
-
-このページが一番詳しいんだけど、どう書けば良いのかは難しい（教えて）
-
-Pandocの内部のデータ構造がわかるとLua filterの書き方がわかってきますよ
-
-
-## スタイルの話再び
-
-Wordのスタイルは段落と文字の2種類がある（PandocのBlockとInlineに相当する）
-
-そのため、スタイルの割り当てで対応するスタイルがないとうまくスタイルをあてられない。
+* そのため、Word形式で出力する場合、スタイルの割り当てで対応するスタイルがないとうまくスタイルをあてられない。
 
 
 
@@ -523,12 +559,13 @@ https://speakerdeck.com/niszet/r-markdownwoshi-tutazai-xian-de-repoteingu
 # おわりに
 ## まとめ
 
-* R MarkdownでWordを作るのは可能
+* R MarkdownでWordを作るのは全然いける
 
-* もうちょっと頑張りどころがある
+* まだもうちょっと頑張りどころがある
 
 * ここでは紹介しきれなかった細かいツラミがある…
 
+* しかし、R/Markdown/YAML/Lua/Haskell/OOXML ... と押さえないといけないもの多すぎじゃないですかね…
 
 
 ## Enjoy!!
